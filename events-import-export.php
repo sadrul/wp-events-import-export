@@ -44,7 +44,7 @@ class EventsImportExport {
 	 * @since 1.0.0
 	 * @var string
 	 */
-	public $plugin_prefix = 'eie'; // should be char & _
+	public $plugin_prefix = 'eie';
 
 	/**
 	 * Plugin version.
@@ -60,7 +60,7 @@ class EventsImportExport {
 	 * @since 1.0.0
 	 * @var string
 	 */
-	public $domain = 'events-import-export'; // it's used for language domain.
+	public $domain = 'events-import-export';
 
 	/**
 	 * Plugin root file.
@@ -168,15 +168,6 @@ class EventsImportExport {
 		);
 	}
 
-	/**
-	 * On plugin deactivate actions.
-	 *
-	 * @since 1.0.0
-	 */
-	public function on_plugin_deactivate() {
-
-		do_action( "{$this->plugin_prefix}_on_plugin_deactivate" );
-	}
 
 }
 
