@@ -12,6 +12,7 @@ global $title;
                 <td>
                     <h2><?php _e( 'Import Events', 'events-import-export' ); ?></h2>
                     <div>
+	                    <?php wp_nonce_field( 'import_events', 'import_events_nonce' ); ?>
                         <input type="submit" name="import-events"
                                value="<?php _e( 'Import Events', 'events-import-export' ); ?>"
                                class="button button-primary"/>
@@ -29,6 +30,7 @@ global $title;
                 <td>
                     <h2><?php _e( 'Export Events', 'events-import-export' ); ?></h2>
                     <div>
+	                    <?php wp_nonce_field( 'export_events', 'export_events_nonce' ); ?>
                         <input type="submit" name="export-events"
                                value="<?php _e( 'Export Events', 'events-import-export' ); ?>"
                                class="button button-primary"/>
