@@ -1,10 +1,23 @@
 <?php
-/*
-Plugin Name: Events import export
-Description: Import, export and show events data.
-Version: 1.0
-Author: Sadrul
-*/
+/**
+ * Events import export
+ *
+ * @package   events-import-export
+ * @author    Sadrul <https://github.com/sadrul>
+ * @link      https://github.com/sadrul/events-import-export
+ *
+ * Plugin Name:     Events import export
+ * Plugin URI:      https://github.com/sadrul/events-import-export
+ * Description:     Import, export and show events data.
+ * Version:         1.0
+ * Author:          Sadrul
+ * Author URI:      https://github.com/sadrul
+ * Text Domain:     events-import-export
+ * Domain Path:     /languages
+ * Requires PHP:    7.1
+ * Requires WP:     5.5.0
+ * Namespace:       EventsImportExport
+ */
 
 declare( strict_types = 1 );
 
@@ -61,6 +74,14 @@ class EventsImportExport {
 	 * @var string
 	 */
 	public $domain = 'events-import-export';
+
+	/**
+	 * namespace.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
+	public $namespace = 'EventsImportExport';
 
 	/**
 	 * Plugin root file.
@@ -140,6 +161,15 @@ class EventsImportExport {
 
 		// Register the hooks
 		$this->hooks();
+
+		// Import events.
+		EventsImportExport\EventsImport::instance();
+
+		// Export events.
+		EventsImportExport\EventsExport::instance();
+
+		// Show events.
+		EventsImportExport\EventsShow::instance();
 	}
 
 	/**
@@ -148,6 +178,59 @@ class EventsImportExport {
 	 * @since 1.0.0
 	 */
 	public function hooks() {
+		add_action( 'admin_menu', array( $this, 'create_admin_pages' ) );
+		add_action( 'init', array( $this, 'import_events_data' ) );
+	}
+
+	/**
+	 * Create admin pages.
+	 *
+	 * @since 1.0.0
+	 */
+	function create_admin_pages(){
+		add_menu_page(
+			__('Manage Events', 'events-import-export'),
+			__('Manage Events', 'events-import-export'),
+			'manage_options',
+			'manage-events',
+			array( $this, 'manage_events_render' )
+		);
+	}
+
+	/**
+	 * Events import export admin page render
+	 *
+	 * @since 1.0.0
+	 */
+	function manage_events_render(){
+		include events_import_export()->plugin_dir . 'views/manage-events-page.php';
+	}
+
+	/**
+	 * Import events data.
+	 *
+	 * @since 1.0.0
+	 */
+	public function import_events_data() {
+
+	}
+
+	/**
+	 * Export events data.
+	 *
+	 * @since 1.0.0
+	 */
+	public function export_events_data() {
+
+	}
+
+	/**
+	 * Show events data.
+	 *
+	 * @since 1.0.0
+	 */
+	public function show_events_data() {
+
 	}
 
 	/**
@@ -186,3 +269,24 @@ function events_import_export(): \EventsImportExport {
  * Call the main function to load class Instance.
  */
 events_import_export();
+
+/**
+ * Autoload class files.
+ */
+spl_autoload_register( function ( $className ) {
+	$namespace = events_import_export()->namespace;
+
+	if ( strpos( $className, $namespace ) !== 0 ) {
+		return;
+	}
+
+	$className = str_replace( $namespace, '', $className );
+	$className = str_replace( '\\', DIRECTORY_SEPARATOR, $className ) . '.php';
+
+	$directory = events_import_export()->plugin_dir;
+	$path      = $directory . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . $className;
+
+	if ( file_exists( $path ) ) {
+		require_once( $path );
+	}
+} );
