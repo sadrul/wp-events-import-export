@@ -72,7 +72,23 @@ class EventsImport {
 		add_action( 'admin_init', array( $this, 'import_events_form_submit' ) );
 		if( class_exists('ACF') ) {
 			add_filter( 'acf/settings/save_json', array( $this, 'acf_json_save_point' ) );
+			add_filter( 'acf/settings/load_json', array( $this, 'acf_json_load_point' ) );
 		}
+	}
+
+	/**
+	 * ACF json file load point.
+	 *
+	 * @param string $path acf json load point path
+	 *
+	 * @return string
+	 * @since 1.0.0
+	 */
+	function acf_json_load_point( $paths ) {
+		unset( $paths[0] );
+		$paths[] = events_import_export()->plugin_dir . 'acf';
+
+		return $paths;
 	}
 
 	/**
@@ -147,11 +163,57 @@ class EventsImport {
 	 * @since 1.0.0
 	 */
 	public function create_events_posts( $events_data ) {
+		$new_events_count = 0;
+		$update_events_count = 0;
 		if ( is_array( $events_data ) && ! empty( $events_data ) ) {
 			foreach ( $events_data as $single_event ) {
-				$this->create_single_event_post( $single_event );
+				// check event already exists.
+				if ( $event_post_id = $this->check_event_exists( $single_event->id ) ) {
+					// update event.
+					if ( $this->create_single_event_post( $single_event, $event_post_id ) ) {
+						$update_events_count ++;
+					}
+				} else {
+					// create new event.
+					if ( $this->create_single_event_post( $single_event ) ) {
+						$new_events_count ++;
+					}
+				}
 			}
+
+			update_option( 'import_events_new_count', $new_events_count );
+			update_option( 'import_events_update_count', $update_events_count );
+
+			// Add success notice.
+			add_action( 'admin_notices', array( $this, 'events_import_notice_success' ) );
+
+			// Add failure notice.
+			if ( ! $new_events_count && ! $update_events_count ) {
+				add_action( 'admin_notices', array( $this, 'events_import_notice_failure' ) );
+			}
+
+			// send email
+			$import_details = array(
+				'total'   => ( $new_events_count + $update_events_count ),
+				'new'     => $new_events_count,
+				'update' => $update_events_count,
+			);
+			$this->import_events_send_email( $import_details );
 		}
+	}
+
+	/**
+	 * Send emails regarding import events.
+	 *
+	 * @param array $import_details import details.
+	 *
+	 * @return void
+	 * @since 1.0.0
+	 */
+	public function import_events_send_email( $import_details ) {
+		$subject = __( 'Update regarding events import', 'events-import-export' );
+		$message = sprintf( __( 'Total %d events imported successfully! %d events created and %d events updated', 'events-import-export' ), $import_details['total'], $import_details['new'], $import_details['update'] );
+		wp_mail( 'testemail@gmail.com', $subject, $message );
 	}
 
 	/**
@@ -159,23 +221,20 @@ class EventsImport {
 	 *
 	 * @param array $single_event single event data.
 	 *
-	 * @return void
+	 * @return false|int
 	 * @since 1.0.0
 	 */
-	public function create_single_event_post( $single_event ) {
-		$post_args = array(
-			'post_type'      => 'event',
-			'post_title'     => ( isset( $single_event->title ) && ! empty( $single_event->title ) ) ? $single_event->title : '',
-			'post_status'    => 'publish',
-			'comment_status' => 'closed',
-			'ping_status'    => 'closed',
+	public function create_single_event_post( $single_event, $event_post_id = 0 ) {
+		$post_id = wp_insert_post(
+			array(
+				'ID'             => $event_post_id,
+				'post_type'      => 'event',
+				'post_title'     => ( isset( $single_event->title ) && ! empty( $single_event->title ) ) ? $single_event->title : '',
+				'post_status'    => 'publish',
+				'comment_status' => 'closed',
+				'ping_status'    => 'closed',
+			)
 		);
-
-		if ( $event_post_id = $this->check_event_exists( $single_event->id ) ) {
-			$post_args['ID'] = $event_post_id;
-		}
-
-		$post_id = wp_insert_post( $post_args );
 
 		if ( $post_id && ! is_wp_error( $post_id ) ) {
 			// Add custom fields.
@@ -190,11 +249,10 @@ class EventsImport {
 					wp_set_object_terms( $post_id, $single_tag, 'post_tag', true );
 				}
 			}
-			// Add success notice.
-			add_action( 'admin_notices', array( $this, 'events_import_notice_success' ) );
+
+			return $post_id;
 		} else {
-			// Add failure notice.
-			add_action( 'admin_notices', array( $this, 'events_import_notice_failure' ) );
+			return false;
 		}
 	}
 
@@ -276,11 +334,14 @@ class EventsImport {
 	 * @since 1.0.0
 	 */
 	public function events_import_notice_success() {
-		?>
-		<div class="notice notice-success is-dismissible">
-			<p><?php _e( 'Events imported successfully!', 'events-import-export' ); ?></p>
-		</div>
-		<?php
+		$new_count    = get_option( 'import_events_new_count' );
+		$update_count = get_option( 'import_events_update_count' );
+		$total_count  = $new_count + $update_count;
+
+		$class   = 'notice notice-success is-dismissible';
+		$message = sprintf( __( 'Total %d events imported successfully! %d events created and %d events updated', 'events-import-export' ), $total_count, $new_count, $update_count );
+
+		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 	}
 
 	/**
@@ -289,7 +350,7 @@ class EventsImport {
 	 * @since 1.0.0
 	 */
 	public function events_import_notice_failure() {
-		$class   = 'notice notice-error';
+		$class   = 'notice notice-error is-dismissible';
 		$message = __( 'Events import failed! Please try again', 'events-import-export' );
 
 		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
