@@ -70,7 +70,9 @@ class EventsImport {
 	public function hooks() {
 		add_action( 'init', array( $this, 'create_events_cpt' ) );
 		add_action( 'admin_init', array( $this, 'import_events_form_submit' ) );
-		add_filter( 'acf/settings/save_json', array( $this, 'acf_json_save_point' ) );
+		if( class_exists('ACF') ) {
+			add_filter( 'acf/settings/save_json', array( $this, 'acf_json_save_point' ) );
+		}
 	}
 
 	/**
@@ -110,6 +112,33 @@ class EventsImport {
 	}
 
 	/**
+	 * Check if event exists.
+	 *
+	 * @param int $event_id event id from custom field.
+	 *
+	 * @since 1.0.0	 *
+	 * @return false|int
+	 */
+	public function check_event_exists( $event_id ) {
+		$args = array(
+			'post_type'  => 'event',
+			'meta_query' => array(
+				array(
+					'key'     => 'event_id',
+					'value'   => $event_id,
+					'compare' => '=',
+				),
+			),
+		);
+		$event_query = new \WP_Query( $args );
+		if ( $event_query->have_posts() ) {
+			return isset( $event_query->posts[0] ) ? $event_query->posts[0]->ID : false;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Create events posts.
 	 *
 	 * @param array $events_data events data array.
@@ -134,46 +163,136 @@ class EventsImport {
 	 * @since 1.0.0
 	 */
 	public function create_single_event_post( $single_event ) {
-		$post_id = wp_insert_post( array(
+		$post_args = array(
 			'post_type'      => 'event',
 			'post_title'     => ( isset( $single_event->title ) && ! empty( $single_event->title ) ) ? $single_event->title : '',
 			'post_status'    => 'publish',
 			'comment_status' => 'closed',
 			'ping_status'    => 'closed',
-		) );
+		);
 
-		if ( $post_id ) {
-			if ( isset( $single_event->id ) && ! empty( $single_event->id ) ) {
-				update_field( 'event_id', $single_event->id, $post_id );
-			}
-			if ( isset( $single_event->about ) && ! empty( $single_event->about ) ) {
-				update_field( 'event_about', $single_event->about, $post_id );
-			}
-			if ( isset( $single_event->organizer ) && ! empty( $single_event->organizer ) ) {
-				update_field( 'event_organizer', $single_event->organizer, $post_id );
-			}
-			if ( isset( $single_event->timestamp ) && ! empty( $single_event->timestamp ) ) {
-				update_field( 'event_timestamp', $single_event->timestamp, $post_id );
-			}
-			if ( isset( $single_event->email ) && ! empty( $single_event->email ) ) {
-				update_field( 'event_email', $single_event->email, $post_id );
-			}
-			if ( isset( $single_event->address ) && ! empty( $single_event->address ) ) {
-				update_field( 'event_address', $single_event->address, $post_id );
-			}
-			if ( isset( $single_event->latitude ) && ! empty( $single_event->latitude ) ) {
-				update_field( 'event_latitude', $single_event->latitude, $post_id );
-			}
-			if ( isset( $single_event->longitude ) && ! empty( $single_event->longitude ) ) {
-				update_field( 'event_longitude', $single_event->longitude, $post_id );
-			}
+		if ( $event_post_id = $this->check_event_exists( $single_event->id ) ) {
+			$post_args['ID'] = $event_post_id;
+		}
 
+		$post_id = wp_insert_post( $post_args );
+
+		if ( $post_id && ! is_wp_error( $post_id ) ) {
+			// Add custom fields.
+			if ( class_exists( 'ACF' ) ) {
+				$this->acf_add_custom_fields( $post_id, $single_event );
+			} else {
+				$this->wp_add_custom_fields( $post_id, $single_event );
+			}
+			// Add tags.
 			if ( isset( $single_event->tags ) && is_array( $single_event->tags ) && ! empty( $single_event->tags ) ) {
 				foreach ( $single_event->tags as $single_tag ) {
 					wp_set_object_terms( $post_id, $single_tag, 'post_tag', true );
 				}
 			}
+			// Add success notice.
+			add_action( 'admin_notices', array( $this, 'events_import_notice_success' ) );
+		} else {
+			// Add failure notice.
+			add_action( 'admin_notices', array( $this, 'events_import_notice_failure' ) );
 		}
+	}
+
+	/**
+	 * WP add custom fields
+	 *
+	 * @param $post_id
+	 * @param $single_event
+	 *
+	 * @return void
+	 * @since 1.0.0
+	 */
+	public function wp_add_custom_fields( $post_id, $single_event ) {
+		if ( isset( $single_event->id ) && ! empty( $single_event->id ) ) {
+			update_post_meta( $post_id, 'event_id', $single_event->id );
+		}
+		if ( isset( $single_event->about ) && ! empty( $single_event->about ) ) {
+			update_post_meta( $post_id, 'event_about', $single_event->about );
+		}
+		if ( isset( $single_event->organizer ) && ! empty( $single_event->organizer ) ) {
+			update_post_meta( $post_id, 'event_organizer', $single_event->organizer );
+		}
+		if ( isset( $single_event->timestamp ) && ! empty( $single_event->timestamp ) ) {
+			update_post_meta( $post_id, 'event_timestamp', $single_event->timestamp );
+		}
+		if ( isset( $single_event->email ) && ! empty( $single_event->email ) ) {
+			update_post_meta( $post_id, 'event_email', $single_event->email );
+		}
+		if ( isset( $single_event->address ) && ! empty( $single_event->address ) ) {
+			update_post_meta( $post_id, 'event_address', $single_event->address );
+		}
+		if ( isset( $single_event->latitude ) && ! empty( $single_event->latitude ) ) {
+			update_post_meta( $post_id, 'event_latitude', $single_event->latitude );
+		}
+		if ( isset( $single_event->longitude ) && ! empty( $single_event->longitude ) ) {
+			update_post_meta( $post_id, 'event_longitude', $single_event->longitude );
+		}
+	}
+
+	/**
+	 * ACF add custom field
+	 *
+	 * @param int $post_id post ID
+	 * @param object $single_event single event data
+	 *
+	 * @return void
+	 * @since 1.0.0
+	 */
+	public function acf_add_custom_fields( $post_id, $single_event ) {
+		if ( isset( $single_event->id ) && ! empty( $single_event->id ) ) {
+			update_field( 'event_id', $single_event->id, $post_id );
+		}
+		if ( isset( $single_event->about ) && ! empty( $single_event->about ) ) {
+			update_field( 'event_about', $single_event->about, $post_id );
+		}
+		if ( isset( $single_event->organizer ) && ! empty( $single_event->organizer ) ) {
+			update_field( 'event_organizer', $single_event->organizer, $post_id );
+		}
+		if ( isset( $single_event->timestamp ) && ! empty( $single_event->timestamp ) ) {
+			update_field( 'event_timestamp', $single_event->timestamp, $post_id );
+		}
+		if ( isset( $single_event->email ) && ! empty( $single_event->email ) ) {
+			update_field( 'event_email', $single_event->email, $post_id );
+		}
+		if ( isset( $single_event->address ) && ! empty( $single_event->address ) ) {
+			update_field( 'event_address', $single_event->address, $post_id );
+		}
+		if ( isset( $single_event->latitude ) && ! empty( $single_event->latitude ) ) {
+			update_field( 'event_latitude', $single_event->latitude, $post_id );
+		}
+		if ( isset( $single_event->longitude ) && ! empty( $single_event->longitude ) ) {
+			update_field( 'event_longitude', $single_event->longitude, $post_id );
+		}
+	}
+
+	/**
+	 * Create events import success notice.
+	 *
+	 * @since 1.0.0
+	 */
+	public function events_import_notice_success() {
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php _e( 'Events imported successfully!', 'events-import-export' ); ?></p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Create events import failure notice.
+	 *
+	 * @since 1.0.0
+	 */
+	public function events_import_notice_failure() {
+		$class   = 'notice notice-error';
+		$message = __( 'Events import failed! Please try again', 'events-import-export' );
+
+		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 	}
 
 	/**
