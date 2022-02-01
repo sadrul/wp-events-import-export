@@ -212,7 +212,7 @@ class EventsImport {
 	 */
 	public function import_events_send_email( $import_details ) {
 		$subject = __( 'Update regarding events import', 'events-import-export' );
-		$message = sprintf( __( 'Total %d events imported successfully! %d events created and %d events updated', 'events-import-export' ), $import_details['total'], $import_details['new'], $import_details['update'] );
+		$message = sprintf( __( 'Total %d events imported successfully! Newly created: %d events and updated: %d events', 'events-import-export' ), $import_details['total'], $import_details['new'], $import_details['update'] );
 		wp_mail( 'testemail@gmail.com', $subject, $message );
 	}
 
@@ -339,7 +339,7 @@ class EventsImport {
 		$total_count  = $new_count + $update_count;
 
 		$class   = 'notice notice-success is-dismissible';
-		$message = sprintf( __( 'Total %d events imported successfully! %d events created and %d events updated', 'events-import-export' ), $total_count, $new_count, $update_count );
+		$message = sprintf( __( 'Total %d events imported successfully! Newly created: %d events and updated: %d events', 'events-import-export' ), $total_count, $new_count, $update_count );
 
 		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 	}
