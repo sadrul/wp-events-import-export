@@ -6,7 +6,7 @@ global $title;
 
     <h1><?php echo $title; ?></h1>
 
-    <form action="" method="post" name="import-events-form">
+    <form action="" method="post" name="import-events-form" id="import-events-form">
         <table class="form-table">
             <tr>
                 <td>
@@ -16,6 +16,12 @@ global $title;
                         <input type="submit" name="import-events"
                                value="<?php _e( 'Import Events', 'events-import-export' ); ?>"
                                class="button button-primary"/>
+
+                        <h4 class="processing-spinner" style="display: none">
+                            <img src="<?php site_url(); ?>/wp-includes/images/wpspin.gif" alt="">
+                            <?php _e( 'Processing.... It might take some time. Please be patient.', 'events-import-export' ); ?>
+                        </h4>
+                        <h4 class="processing-success" style="display: none"></h4>
                     </div>
                 </td>
             </tr>

@@ -178,11 +178,46 @@ class EventsImportExport {
 	 * @since 1.0.0
 	 */
 	public function hooks() {
+		// add admin assets.
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_assets' ) );
+		// add frontend assets.
+		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_enqueue_assets' ) );
+		// add admin menu.
 		add_action( 'admin_menu', array( $this, 'create_admin_pages' ) );
-		// make wp-cli ready
+		// make wp-cli ready.
 		if ( class_exists( 'WP_CLI' ) ) {
 			WP_CLI::add_command( 'import-events', array( $this, 'import_events_data' ) );
 		}
+	}
+
+	/**
+	 * Add frontend assets.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	function frontend_enqueue_assets() {
+		wp_enqueue_style( 'frontend-css', $this->plugin_url . 'assets/css/frontend.css', array(), $this->plugin_version );
+	}
+
+	/**
+	 * Add admin assets.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	function admin_enqueue_assets() {
+		wp_enqueue_style( 'frontend-css', $this->plugin_url . 'assets/css/frontend.css', array(), $this->plugin_version );
+
+		wp_enqueue_script(
+			'backend-js',
+			$this->plugin_url . 'assets/js/backend.js',
+			array(
+				'jquery',
+			),
+			$this->plugin_version,
+			true
+		);
 	}
 
 	/**
@@ -217,8 +252,12 @@ class EventsImportExport {
 	public function import_events_data() {
 		$import_details = EventsImportExport\EventsImport::instance()->import_events_from_json_file();
 		// display import result.
-		if ( class_exists( 'WP_CLI' ) && isset( $import_details ) && ! empty( $import_details ) ) {
-			WP_CLI::log( sprintf( __( 'Total %d events imported successfully! Newly created: %d events and updated: %d events', 'events-import-export' ), $import_details['total'], $import_details['new'], $import_details['update'] ) );
+		if ( class_exists( 'WP_CLI' ) ) {
+			if ( isset( $import_details ) && ! empty( $import_details ) ) {
+				WP_CLI::log( sprintf( __( 'Total %d events imported successfully! Newly created: %d events and updated: %d events', 'events-import-export' ), $import_details['total'], $import_details['new'], $import_details['update'] ) );
+			} else {
+				WP_CLI::log( __( 'Something went wrong! Please check if the json file exists and in correct format.', 'events-import-export' ) );
+			}
 		}
 	}
 

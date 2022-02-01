@@ -69,11 +69,11 @@ class EventsImport {
 	 */
 	public function hooks() {
 		add_action( 'init', array( $this, 'create_events_cpt' ) );
-		add_action( 'admin_init', array( $this, 'import_events_form_submit' ) );
-		if( class_exists('ACF') ) {
+		if ( class_exists( 'ACF' ) ) {
 			add_filter( 'acf/settings/save_json', array( $this, 'acf_json_save_point' ) );
 			add_filter( 'acf/settings/load_json', array( $this, 'acf_json_load_point' ) );
 		}
+		add_action( 'wp_ajax_import_events', array( $this, 'import_events_form_submit' ) );
 	}
 
 	/**
@@ -114,7 +114,13 @@ class EventsImport {
 		if ( isset( $_POST['import_events_nonce'] )
 		     && wp_verify_nonce( $_POST['import_events_nonce'], 'import_events' )
 		) {
-			$this->import_events_from_json_file();
+			$import_details = $this->import_events_from_json_file();
+			if ( isset( $import_details ) && ! empty( $import_details ) ) {
+				printf( __( 'Total %d events imported successfully! Newly created: %d events and updated: %d events', 'events-import-export' ), $import_details['total'], $import_details['new'], $import_details['update'] );
+			}else{
+				_e( 'Something went wrong! Please check if the json file exists and in correct format.', 'events-import-export' );
+			}
+			exit;
 		}
 	}
 
@@ -124,6 +130,8 @@ class EventsImport {
 	 * @since 1.0.0
 	 */
 	public function import_events_from_json_file() {
+		$result = array();
+
 		// get data from file
 		$json_data = file_get_contents( events_import_export()->plugin_dir . 'data.json' );
 
@@ -132,8 +140,10 @@ class EventsImport {
 			$events_data = json_decode( $json_data );
 
 			// create events post from data
-			return $this->create_events_posts( $events_data );
+			$result = $this->create_events_posts( $events_data );
 		}
+
+		return $result;
 	}
 
 	/**
@@ -194,14 +204,6 @@ class EventsImport {
 
 			update_option( 'import_events_new_count', $new_events_count );
 			update_option( 'import_events_update_count', $update_events_count );
-
-			// Add success notice.
-			add_action( 'admin_notices', array( $this, 'events_import_notice_success' ) );
-
-			// Add failure notice.
-			if ( ! $new_events_count && ! $update_events_count ) {
-				add_action( 'admin_notices', array( $this, 'events_import_notice_failure' ) );
-			}
 
 			// send email
 			$import_details = array(
@@ -339,34 +341,6 @@ class EventsImport {
 		if ( isset( $single_event->longitude ) && ! empty( $single_event->longitude ) ) {
 			update_field( 'event_longitude', $single_event->longitude, $post_id );
 		}
-	}
-
-	/**
-	 * Create events import success notice.
-	 *
-	 * @since 1.0.0
-	 */
-	public function events_import_notice_success() {
-		$new_count    = get_option( 'import_events_new_count' );
-		$update_count = get_option( 'import_events_update_count' );
-		$total_count  = $new_count + $update_count;
-
-		$class   = 'notice notice-success is-dismissible';
-		$message = sprintf( __( 'Total %d events imported successfully! Newly created: %d events and updated: %d events', 'events-import-export' ), $total_count, $new_count, $update_count );
-
-		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
-	}
-
-	/**
-	 * Create events import failure notice.
-	 *
-	 * @since 1.0.0
-	 */
-	public function events_import_notice_failure() {
-		$class   = 'notice notice-error is-dismissible';
-		$message = __( 'Events import failed! Please try again', 'events-import-export' );
-
-		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 	}
 
 	/**
