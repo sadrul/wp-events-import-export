@@ -114,16 +114,25 @@ class EventsImport {
 		if ( isset( $_POST['import_events_nonce'] )
 		     && wp_verify_nonce( $_POST['import_events_nonce'], 'import_events' )
 		) {
-			// get data from file
-			$json_data = file_get_contents( events_import_export()->plugin_dir . 'data.json' );
+			$this->import_events_from_json_file();
+		}
+	}
 
-			if ( ! empty ( $json_data ) ) {
-				// decode json data
-				$events_data = json_decode( $json_data );
+	/**
+	 * Import events form json file.
+	 *
+	 * @since 1.0.0
+	 */
+	public function import_events_from_json_file() {
+		// get data from file
+		$json_data = file_get_contents( events_import_export()->plugin_dir . 'data.json' );
 
-				// create events post from data
-				$this->create_events_posts( $events_data );
-			}
+		if ( ! empty ( $json_data ) ) {
+			// decode json data
+			$events_data = json_decode( $json_data );
+
+			// create events post from data
+			return $this->create_events_posts( $events_data );
 		}
 	}
 
@@ -163,8 +172,10 @@ class EventsImport {
 	 * @since 1.0.0
 	 */
 	public function create_events_posts( $events_data ) {
-		$new_events_count = 0;
+		$import_details      = array();
+		$new_events_count    = 0;
 		$update_events_count = 0;
+
 		if ( is_array( $events_data ) && ! empty( $events_data ) ) {
 			foreach ( $events_data as $single_event ) {
 				// check event already exists.
@@ -194,12 +205,14 @@ class EventsImport {
 
 			// send email
 			$import_details = array(
-				'total'   => ( $new_events_count + $update_events_count ),
-				'new'     => $new_events_count,
+				'total'  => ( $new_events_count + $update_events_count ),
+				'new'    => $new_events_count,
 				'update' => $update_events_count,
 			);
 			$this->import_events_send_email( $import_details );
 		}
+
+		return $import_details;
 	}
 
 	/**

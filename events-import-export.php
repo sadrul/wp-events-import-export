@@ -179,7 +179,10 @@ class EventsImportExport {
 	 */
 	public function hooks() {
 		add_action( 'admin_menu', array( $this, 'create_admin_pages' ) );
-		add_action( 'init', array( $this, 'import_events_data' ) );
+		// make wp-cli ready
+		if ( class_exists( 'WP_CLI' ) ) {
+			WP_CLI::add_command( 'import-events', array( $this, 'import_events_data' ) );
+		}
 	}
 
 	/**
@@ -212,25 +215,11 @@ class EventsImportExport {
 	 * @since 1.0.0
 	 */
 	public function import_events_data() {
-
-	}
-
-	/**
-	 * Export events data.
-	 *
-	 * @since 1.0.0
-	 */
-	public function export_events_data() {
-
-	}
-
-	/**
-	 * Show events data.
-	 *
-	 * @since 1.0.0
-	 */
-	public function show_events_data() {
-
+		$import_details = EventsImportExport\EventsImport::instance()->import_events_from_json_file();
+		// display import result.
+		if ( class_exists( 'WP_CLI' ) && isset( $import_details ) && ! empty( $import_details ) ) {
+			WP_CLI::log( sprintf( __( 'Total %d events imported successfully! Newly created: %d events and updated: %d events', 'events-import-export' ), $import_details['total'], $import_details['new'], $import_details['update'] ) );
+		}
 	}
 
 	/**
