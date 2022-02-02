@@ -11,6 +11,9 @@
 namespace EventsImportExport;
 
 
+use DateTime;
+use WP_Query;
+
 /**
  * The class definition for events show.
  *
@@ -68,7 +71,140 @@ class EventsShow {
 	 * @since 1.0.0
 	 */
 	public function hooks() {
+		// create events list page.
+		add_action( 'admin_init', array( $this, 'create_events_list_page' ) );
+		// register shortcode.
+		add_action( 'init', array( $this, 'register_shortcode' ) );
+	}
 
+	/**
+	 * Register shortcode.
+	 *
+	 * @since 1.0.0
+	 */
+	public function register_shortcode(){
+		add_shortcode( 'events_list', array( $this, 'events_list_render' ) );
+	}
+
+	/**
+	 * Create shortcode to display events list.
+	 *
+	 * @since 1.0.0
+	 */
+	public function events_list_render( $atts ) {
+		ob_start();
+
+		$paged        = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
+		$args         = array(
+			'post_type'      => 'event',
+			'posts_per_page' => 10,
+			'paged'          => $paged
+		);
+		$events_query = new WP_Query( $args );
+
+		if ( $events_query->have_posts() ) : ?>
+            <div class="events-wrap">
+                <ul class="events-lists">
+                    <?php
+                    while ( $events_query->have_posts() ) : $events_query->the_post();
+                        include events_import_export()->plugin_dir . 'views/events-show.php';
+                    endwhile;
+                    $this->events_pagination( $paged, $events_query->max_num_pages);
+                    ?>
+                </ul>
+            </div>
+            <?php
+        endif;
+		wp_reset_postdata();
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Number pagination function.
+	 *
+	 * @since 1.0.0
+	 */
+	public function events_pagination( $paged, $max_page ) {
+		$big = 999999999;
+		if ( ! $paged ) {
+			$paged = get_query_var( 'paged' );
+		}
+		echo paginate_links( array(
+			'base'      => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
+			'format'    => '?paged=%#%',
+			'current'   => max( 1, $paged ),
+			'total'     => $max_page,
+			'mid_size'  => 1,
+			'prev_text' => __( '«' ),
+			'next_text' => __( '»' ),
+			'type'      => 'list'
+		) );
+	}
+
+	/**
+	 * Create a page to display events list.
+	 *
+	 * @since 1.0.0
+	 */
+	public function create_events_list_page() {
+		$page_ID = 0;
+
+		// check if page already exists.
+		$if_exists = get_page_by_title( 'Loop events list' );
+
+		// bail out if already exists with target shortcode.
+		if ( $if_exists && isset( $if_exists->post_content ) && $if_exists->post_content == '[events_list]' ) {
+			return;
+		}
+
+		// if target shortcode not in content, then update the page.
+		if ( $if_exists && isset( $if_exists->ID ) && ! empty( $if_exists->ID ) ) {
+			$page_ID = $if_exists->ID;
+		}
+
+		// create/update page.
+		wp_insert_post(
+			array(
+				'post_title'   => 'Loop events list',
+				'post_content' => '[events_list]',
+				'post_status'  => 'publish',
+				'post_type'    => 'page',
+				'ID'           => $page_ID,
+			)
+		);
+	}
+
+	/**
+	 * Event time diff format.
+	 *
+	 * @since 1.0.0
+	 */
+	public function events_time_diff_format( $to_date ) {
+		$from_date  = date( 'Y-m-d H:i:s' );
+		$from_date  = new DateTime( $from_date );
+		$to_date    = new DateTime( $to_date );
+		$interval   = $from_date->diff( $to_date );
+		$difference = array();
+
+		if ( $interval->m > 0 ) {
+			$difference[] = $interval->m . __( ' months', 'events-import-export' ) . "\n";
+		}
+		if ( $interval->d > 0 ) {
+			$difference[] = $interval->d . __( ' days', 'events-import-export' ) . "\n";
+		}
+		if ( $interval->h > 0 ) {
+			$difference[] = $interval->h . __( ' hours', 'events-import-export' ) . "\n";
+		}
+		if ( $interval->i > 0 ) {
+			$difference[] = $interval->i . __( ' minutes', 'events-import-export' ) . "\n";
+		}
+
+		if ( ! empty( $difference ) ) {
+			$difference = __( 'in ', 'events-import-export' ) . implode( ', ', $difference );
+		}
+
+		return $difference;
 	}
 
 }

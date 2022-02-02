@@ -251,6 +251,7 @@ class EventsImport {
 				'ID'             => $event_post_id,
 				'post_type'      => 'event',
 				'post_title'     => ( isset( $single_event->title ) && ! empty( $single_event->title ) ) ? $single_event->title : '',
+				'post_content'   => ( isset( $single_event->about ) && ! empty( $single_event->about ) ) ? $single_event->about : '',
 				'post_status'    => $post_status,
 				'comment_status' => 'closed',
 				'ping_status'    => 'closed',
