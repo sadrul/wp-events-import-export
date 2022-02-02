@@ -240,12 +240,18 @@ class EventsImport {
 	 * @since 1.0.0
 	 */
 	public function create_single_event_post( $single_event, $event_post_id = 0 ) {
+		$post_status = 'publish';
+
+		if ( isset( $single_event->timestamp ) && ! empty( $single_event->timestamp ) && ( time() > strtotime( $single_event->timestamp ) ) ) {
+			$post_status = 'draft';
+		}
+
 		$post_id = wp_insert_post(
 			array(
 				'ID'             => $event_post_id,
 				'post_type'      => 'event',
 				'post_title'     => ( isset( $single_event->title ) && ! empty( $single_event->title ) ) ? $single_event->title : '',
-				'post_status'    => 'publish',
+				'post_status'    => $post_status,
 				'comment_status' => 'closed',
 				'ping_status'    => 'closed',
 			)
