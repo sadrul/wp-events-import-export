@@ -45,7 +45,7 @@ global $title;
                 <h2><?php _e( 'Show Events', 'events-import-export' ); ?></h2>
                 <div>
                     <?php $events_page = get_page_by_title( 'Loop events list' ); ?>
-                    <a target="_blank" href="<?php echo get_the_permalink($events_page->ID); ?>"><?php _e( 'Go to events list page', 'events-import-export' ); ?></a>
+                    <a target="_blank" href="<?php echo get_the_permalink( $events_page->ID ); ?>"><?php _e( 'Go to events list page', 'events-import-export' ); ?></a>
                 </div>
             </td>
         </tr>
@@ -53,21 +53,17 @@ global $title;
 
     <hr>
 
-    <form action="<?php echo site_url().'/events-export'; ?>" method="post" name="export-events-form">
-        <table class="form-table">
-            <tr>
-                <td>
-                    <h2><?php _e( 'Export Events', 'events-import-export' ); ?></h2>
-                    <div>
-	                    <?php wp_nonce_field( 'export_events', 'export_events_nonce' ); ?>
-                        <input type="submit" name="export-events"
-                               value="<?php _e( 'Export Events', 'events-import-export' ); ?>"
-                               class="button button-primary"/>
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </form>
+    <table class="form-table">
+        <tr>
+            <td>
+                <h2><?php _e( 'Export Events', 'events-import-export' ); ?></h2>
+                <div>
+			        <?php $events_export_page = get_page_by_title( 'Events export' ); ?>
+                    <a target="_blank" href="<?php echo get_the_permalink( $events_export_page->ID ); ?>"><?php _e( 'Export Events', 'events-import-export' ); ?></a>
+                </div>
+            </td>
+        </tr>
+    </table>
 
 </div>
 

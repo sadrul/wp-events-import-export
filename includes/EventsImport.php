@@ -226,9 +226,17 @@ class EventsImport {
 	 * @since 1.0.0
 	 */
 	public function import_events_send_email( $import_details ) {
+		$events_page = get_page_by_title( 'Loop events list' );
+		$events_page = get_the_permalink( $events_page->ID );
+
+		$events_export_page = get_page_by_title( 'Events export' );
+		$events_export_page = get_the_permalink( $events_export_page->ID );
+
 		$subject = __( 'Update regarding events import', 'events-import-export' );
-		$message = sprintf( __( 'Total %d events imported successfully! Newly created: %d events and updated: %d events', 'events-import-export' ), $import_details['total'], $import_details['new'], $import_details['update'] );
-		wp_mail( 'testemail@gmail.com', $subject, $message );
+		$message = sprintf( __( "Total %d events imported successfully! Newly created: %d events and updated: %d events", "events-import-export" ), $import_details['total'], $import_details['new'], $import_details['update'] );
+		$message .= sprintf( __( "\n\nTo see the upcoming events, please click here - %s", "events-import-export" ), $events_page );
+		$message .= sprintf( __( "\n\nTo export the upcoming events, please click here - %s", "events-import-export" ), $events_export_page );
+		wp_mail( 'logging@agentur-loop.com', $subject, $message );
 	}
 
 	/**

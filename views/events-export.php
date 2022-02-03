@@ -35,7 +35,7 @@ if ( $events_query->have_posts() ) :
 			'title'     => trim( $event_title ),
 			'about'     => trim( $event_content ),
 			'organizer' => get_post_meta( get_the_ID(), 'event_organizer', true ),
-			'timestamp' => get_post_meta( get_the_ID(), 'event_timestamp', true ),
+			'timestamp' => date( 'Y-m-d H:i:s', get_post_meta( get_the_ID(), 'event_timestamp', true ) ),
 			'email'     => get_post_meta( get_the_ID(), 'event_email', true ),
 			'address'   => get_post_meta( get_the_ID(), 'event_address', true ),
 			'latitude'  => get_post_meta( get_the_ID(), 'event_latitude', true ),
