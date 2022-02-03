@@ -196,6 +196,9 @@ class EventsShow {
 				'ID'           => $page_ID,
 			)
 		);
+
+		// flush rewrite rules.
+		events_import_export()->flush_rewrite_rules();
 	}
 
 	/**

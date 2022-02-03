@@ -262,6 +262,23 @@ class EventsImportExport {
 	}
 
 	/**
+	 * Flush rewrite rules.
+	 *
+	 * @since 1.0.0
+	 */
+	public function flush_rewrite_rules(){
+		flush_rewrite_rules();
+
+		// flush cache when caching plugin is active.
+		if ( function_exists( 'flush_all' ) ) {
+			flush_all();
+		} else {
+			// Clear the cache.
+			wp_cache_flush();
+		}
+	}
+
+	/**
 	 * Loads text domain.
 	 *
 	 * @since 1.0.0

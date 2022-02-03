@@ -27,14 +27,6 @@ class EventsExport {
 	private static $instance;
 
 	/**
-	 * events export page ID.
-	 *
-	 * @since 1.0.0
-	 * @var string
-	 */
-	public $events_export_page_id = '';
-
-	/**
 	 * Constructor
 	 *
 	 * @since 1.0.0
@@ -88,13 +80,11 @@ class EventsExport {
 	 * @since 1.0.0
 	 */
 	public function create_events_export_page() {
-		$page_ID = 0;
-
 		// check if page already exists.
 		$if_exists = get_page_by_title( 'Events export' );
 
 		if ( $if_exists && isset( $if_exists->ID ) && ! empty( $if_exists->ID ) ) {
-			$page_ID = $if_exists->ID;
+			return;
 		}
 
 		// create/update page.
@@ -103,11 +93,11 @@ class EventsExport {
 				'post_title'   => 'Events export',
 				'post_status'  => 'publish',
 				'post_type'    => 'page',
-				'ID'           => $page_ID,
 			)
 		);
 
-		$this->events_export_page_id = $page_ID;
+		// flush rewrite rules.
+		events_import_export()->flush_rewrite_rules();
 	}
 
 	/**
