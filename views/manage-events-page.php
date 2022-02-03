@@ -53,7 +53,7 @@ global $title;
 
     <hr>
 
-    <form action="" method="post" name="export-events-form">
+    <form action="<?php echo site_url().'/events-export'; ?>" method="post" name="export-events-form">
         <table class="form-table">
             <tr>
                 <td>
