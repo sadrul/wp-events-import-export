@@ -291,14 +291,11 @@ class EventsImport {
 		if ( isset( $single_event->id ) && ! empty( $single_event->id ) ) {
 			update_post_meta( $post_id, 'event_id', $single_event->id );
 		}
-		if ( isset( $single_event->about ) && ! empty( $single_event->about ) ) {
-			update_post_meta( $post_id, 'event_about', $single_event->about );
-		}
 		if ( isset( $single_event->organizer ) && ! empty( $single_event->organizer ) ) {
 			update_post_meta( $post_id, 'event_organizer', $single_event->organizer );
 		}
 		if ( isset( $single_event->timestamp ) && ! empty( $single_event->timestamp ) ) {
-			update_post_meta( $post_id, 'event_timestamp', $single_event->timestamp );
+			update_post_meta( $post_id, 'event_timestamp', strtotime( $single_event->timestamp ) );
 		}
 		if ( isset( $single_event->email ) && ! empty( $single_event->email ) ) {
 			update_post_meta( $post_id, 'event_email', $single_event->email );
@@ -327,14 +324,11 @@ class EventsImport {
 		if ( isset( $single_event->id ) && ! empty( $single_event->id ) ) {
 			update_field( 'event_id', $single_event->id, $post_id );
 		}
-		if ( isset( $single_event->about ) && ! empty( $single_event->about ) ) {
-			update_field( 'event_about', $single_event->about, $post_id );
-		}
 		if ( isset( $single_event->organizer ) && ! empty( $single_event->organizer ) ) {
 			update_field( 'event_organizer', $single_event->organizer, $post_id );
 		}
 		if ( isset( $single_event->timestamp ) && ! empty( $single_event->timestamp ) ) {
-			update_field( 'event_timestamp', $single_event->timestamp, $post_id );
+			update_field( 'event_timestamp', strtotime( $single_event->timestamp ), $post_id );
 		}
 		if ( isset( $single_event->email ) && ! empty( $single_event->email ) ) {
 			update_field( 'event_email', $single_event->email, $post_id );

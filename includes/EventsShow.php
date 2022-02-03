@@ -98,6 +98,10 @@ class EventsShow {
 		$args         = array(
 			'post_type'      => 'event',
 			'posts_per_page' => 10,
+			'meta_key'       => 'event_timestamp',
+			'meta_type'      => 'NUMERIC',
+			'orderby'        => 'meta_value_num',
+			'order'          => 'ASC',
 			'paged'          => $paged
 		);
 		$events_query = new WP_Query( $args );
@@ -181,6 +185,7 @@ class EventsShow {
 	 * @since 1.0.0
 	 */
 	public function events_time_diff_format( $to_date ) {
+		$to_date    = date( 'Y-m-d H:i:s', $to_date );
 		$from_date  = date( 'Y-m-d H:i:s' );
 		$from_date  = new DateTime( $from_date );
 		$to_date    = new DateTime( $to_date );
@@ -188,16 +193,16 @@ class EventsShow {
 		$difference = array();
 
 		if ( $interval->m > 0 ) {
-			$difference[] = $interval->m . __( ' months', 'events-import-export' ) . "\n";
+			$difference[] = $interval->m . _n( ' month', ' months', $interval->m, 'events-import-export' ) . "\n";
 		}
 		if ( $interval->d > 0 ) {
-			$difference[] = $interval->d . __( ' days', 'events-import-export' ) . "\n";
+			$difference[] = $interval->d . _n( ' day', ' days', $interval->d, 'events-import-export' ) . "\n";
 		}
 		if ( $interval->h > 0 ) {
-			$difference[] = $interval->h . __( ' hours', 'events-import-export' ) . "\n";
+			$difference[] = $interval->h . _n( ' hour', ' hours', $interval->h, 'events-import-export' ) . "\n";
 		}
 		if ( $interval->i > 0 ) {
-			$difference[] = $interval->i . __( ' minutes', 'events-import-export' ) . "\n";
+			$difference[] = $interval->i . _n( ' minute', ' minutes', $interval->i, 'events-import-export' ) . "\n";
 		}
 
 		if ( ! empty( $difference ) ) {

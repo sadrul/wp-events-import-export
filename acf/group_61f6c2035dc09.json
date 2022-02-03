@@ -22,25 +22,6 @@
             "maxlength": ""
         },
         {
-            "key": "field_61f6c21d9feb5",
-            "label": "About",
-            "name": "event_about",
-            "type": "textarea",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "placeholder": "",
-            "maxlength": "",
-            "rows": "",
-            "new_lines": ""
-        },
-        {
             "key": "field_61f6c2449feb6",
             "label": "Organizer",
             "name": "event_organizer",
@@ -170,5 +151,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1643569013
+    "modified": 1643866915
 }
