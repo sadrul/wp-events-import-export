@@ -1,4 +1,13 @@
 <?php
+/**
+ * Events import export
+ *
+ * @package   events-import-export
+ * @author    Sadrul <https://github.com/sadrul>
+
+ * @link      https://github.com/sadrul/events-import-export
+ */
+
 global $title;
 ?>
 

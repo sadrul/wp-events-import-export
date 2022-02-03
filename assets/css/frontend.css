@@ -3,11 +3,15 @@
     margin-bottom: 20px;
 }
 .event-title,
+.event-id span,
 .event-organizer span,
-.event-address span{
+.event-email span,
+.event-address span,
+.event-latitude span,
+.event-longitude span{
     font-weight: bold;
 }
-.event-time{
+.event-timestamp{
     font-style: italic;
 }
 .page-numbers{

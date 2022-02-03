@@ -75,6 +75,25 @@ class EventsShow {
 		add_action( 'admin_init', array( $this, 'create_events_list_page' ) );
 		// register shortcode.
 		add_action( 'init', array( $this, 'register_shortcode' ) );
+		// add event single page template.
+		add_filter( 'single_template', array( $this, 'event_single_page_template' ) );
+	}
+
+	/**
+	 * Add event single page template.
+	 *
+	 * @since 1.0.0
+	 */
+	public function event_single_page_template( $single ) {
+		global $post;
+
+		if ( $post->post_type == 'event' ) {
+			if ( file_exists( events_import_export()->plugin_dir . 'views/event-single.php' ) ) {
+				return events_import_export()->plugin_dir . 'views/event-single.php';
+			}
+		}
+
+		return $single;
 	}
 
 	/**
