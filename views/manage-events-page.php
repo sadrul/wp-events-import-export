@@ -30,6 +30,20 @@ global $title;
 
     <hr>
 
+    <table class="form-table">
+        <tr>
+            <td>
+                <h2><?php _e( 'Show Events', 'events-import-export' ); ?></h2>
+                <div>
+                    <?php $events_page = get_page_by_title( 'Loop events list' ); ?>
+                    <a target="_blank" href="<?php echo get_the_permalink($events_page->ID); ?>"><?php _e( 'Go to events list page', 'events-import-export' ); ?></a>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <hr>
+
     <form action="" method="post" name="export-events-form">
         <table class="form-table">
             <tr>

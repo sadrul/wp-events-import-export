@@ -2,6 +2,14 @@
     list-style: none;
     margin-bottom: 20px;
 }
+.event-title,
+.event-organizer span,
+.event-address span{
+    font-weight: bold;
+}
+.event-time{
+    font-style: italic;
+}
 .page-numbers{
     margin-top: 30px;
 }
