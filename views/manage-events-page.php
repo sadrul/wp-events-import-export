@@ -44,8 +44,13 @@ global $title;
             <td>
                 <h2><?php _e( 'Show Events', 'events-import-export' ); ?></h2>
                 <div>
-                    <?php $events_page = get_page_by_title( 'Loop events list' ); ?>
-                    <a target="_blank" href="<?php echo get_the_permalink( $events_page->ID ); ?>"><?php _e( 'Go to events list page', 'events-import-export' ); ?></a>
+		            <?php $events_page = get_page_by_title( 'Loop events list' ); ?>
+		            <?php if ( isset( $events_page->ID ) && ! empty( $events_page->ID ) ): ?>
+                        <a target="_blank"
+                           href="<?php echo get_the_permalink( $events_page->ID ); ?>"><?php _e( 'Go to events list page', 'events-import-export' ); ?></a>
+		            <?php else : ?>
+			            <?php _e( 'Required page is not created yet. Please reactivate the "Events import export" plugin', 'events-import-export' ); ?>
+		            <?php endif; ?>
                 </div>
             </td>
         </tr>
@@ -58,8 +63,13 @@ global $title;
             <td>
                 <h2><?php _e( 'Export Events', 'events-import-export' ); ?></h2>
                 <div>
-			        <?php $events_export_page = get_page_by_title( 'Events export' ); ?>
-                    <a target="_blank" href="<?php echo get_the_permalink( $events_export_page->ID ); ?>"><?php _e( 'Export Events', 'events-import-export' ); ?></a>
+					<?php $events_export_page = get_page_by_title( 'Events export' ); ?>
+					<?php if ( isset( $events_export_page->ID ) && ! empty( $events_export_page->ID ) ): ?>
+                        <a target="_blank"
+                           href="<?php echo get_the_permalink( $events_export_page->ID ); ?>"><?php _e( 'Export Events', 'events-import-export' ); ?></a>
+	                <?php else : ?>
+						<?php _e( 'Required page is not created yet. Please reactivate the "Events import export" plugin', 'events-import-export' ); ?>
+					<?php endif; ?>
                 </div>
             </td>
         </tr>

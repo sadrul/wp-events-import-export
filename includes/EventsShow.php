@@ -71,8 +71,6 @@ class EventsShow {
 	 * @since 1.0.0
 	 */
 	public function hooks() {
-		// create events list page.
-		add_action( 'admin_init', array( $this, 'create_events_list_page' ) );
 		// register shortcode.
 		add_action( 'init', array( $this, 'register_shortcode' ) );
 		// event single post content modify.
@@ -211,9 +209,6 @@ class EventsShow {
 				'ID'           => $page_ID,
 			)
 		);
-
-		// flush rewrite rules.
-		events_import_export()->flush_rewrite_rules();
 	}
 
 	/**

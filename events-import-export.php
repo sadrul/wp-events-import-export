@@ -147,7 +147,26 @@ class EventsImportExport {
 
 		define( 'EIE_PLUGIN_URL', $this->plugin_url );
 
+		// Register activation hooks.
+		register_activation_hook( $root_file, array( $this, 'on_plugin_activate' ) );
+
 		add_action( 'plugins_loaded', array( $this, 'load' ), 0 );
+	}
+
+	/**
+	 * Actions on plugin activate.
+	 *
+	 * @since 1.0.0
+	 */
+	public function on_plugin_activate(){
+		// create events list page
+		EventsImportExport\EventsShow::instance()->create_events_list_page();
+
+		// create events export page
+		EventsImportExport\EventsExport::instance()->create_events_export_page();
+
+		// flush rewrite rules.
+		$this->flush_rewrite_rules();
 	}
 
 	/**

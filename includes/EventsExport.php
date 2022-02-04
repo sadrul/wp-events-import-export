@@ -68,8 +68,6 @@ class EventsExport {
 	 * @since 1.0.0
 	 */
 	public function hooks() {
-		// create events export page.
-		add_action( 'admin_init', array( $this, 'create_events_export_page' ) );
 		// add events export page template.
 		add_filter( 'page_template', array( $this, 'events_export_page_template' ) );
 	}
@@ -95,9 +93,6 @@ class EventsExport {
 				'post_type'    => 'page',
 			)
 		);
-
-		// flush rewrite rules.
-		events_import_export()->flush_rewrite_rules();
 	}
 
 	/**

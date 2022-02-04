@@ -49,4 +49,8 @@ endif;
 
 wp_reset_postdata();
 
-echo json_encode( $events_data );
+if ( ! empty( $events_data ) ) {
+	echo json_encode( $events_data );
+} else {
+	_e( 'No data available', 'events-import-export' );
+}
