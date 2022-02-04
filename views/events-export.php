@@ -50,7 +50,9 @@ endif;
 wp_reset_postdata();
 
 if ( ! empty( $events_data ) ) {
-	echo json_encode( $events_data );
+	echo '<pre>';
+	echo json_encode( $events_data, JSON_PRETTY_PRINT );
+	echo '</pre>';
 } else {
 	_e( 'No data available', 'events-import-export' );
 }
