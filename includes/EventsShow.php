@@ -75,25 +75,40 @@ class EventsShow {
 		add_action( 'admin_init', array( $this, 'create_events_list_page' ) );
 		// register shortcode.
 		add_action( 'init', array( $this, 'register_shortcode' ) );
-		// add event single page template.
-		add_filter( 'single_template', array( $this, 'event_single_page_template' ) );
+		// event single post content modify.
+		add_filter( 'the_content', array( $this, 'event_single_post_content_modify' ) );
 	}
 
 	/**
-	 * Add event single page template.
+	 * Event single post content modify.
 	 *
 	 * @since 1.0.0
 	 */
-	public function event_single_page_template( $single ) {
-		global $post;
+	public function event_single_post_content_modify( $content ) {
+		if ( is_singular() && in_the_loop() && is_main_query() && get_post_type( get_the_ID() ) == 'event' ) {
+			ob_start();
+			?>
+            <div class="event-timestamp">
+				<?php
+				$event_timestamp = get_post_meta( get_the_ID(), 'event_timestamp', true );
+				echo \EventsImportExport\EventsShow::instance()->events_time_diff_format( $event_timestamp );
+				?>
+            </div>
 
-		if ( $post->post_type == 'event' ) {
-			if ( file_exists( events_import_export()->plugin_dir . 'views/event-single.php' ) ) {
-				return events_import_export()->plugin_dir . 'views/event-single.php';
-			}
+			<?php echo $content; ?>
+
+            <div class="event-id"><?php printf( __( '<span>ID</span>: %s', 'events-import-export' ), get_post_meta( get_the_ID(), 'event_id', true ) ); ?></div>
+            <div class="event-organizer"><?php printf( __( '<span>Organizer</span>: %s', 'events-import-export' ), get_post_meta( get_the_ID(), 'event_organizer', true ) ); ?></div>
+            <div class="event-email"><?php printf( __( '<span>Email</span>: %s', 'events-import-export' ), get_post_meta( get_the_ID(), 'event_email', true ) ); ?></div>
+            <div class="event-address"><?php printf( __( '<span>Address</span>: %s', 'events-import-export' ), get_post_meta( get_the_ID(), 'event_address', true ) ); ?></div>
+            <div class="event-latitude"><?php printf( __( '<span>Latitude</span>: %s', 'events-import-export' ), get_post_meta( get_the_ID(), 'event_latitude', true ) ); ?></div>
+            <div class="event-longitude"><?php printf( __( '<span>Longitude</span>: %s', 'events-import-export' ), get_post_meta( get_the_ID(), 'event_longitude', true ) ); ?></div>
+
+			<?php
+			$content = ob_get_clean();
 		}
 
-		return $single;
+		return $content;
 	}
 
 	/**
