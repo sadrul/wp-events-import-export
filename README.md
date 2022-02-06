@@ -29,6 +29,10 @@ wp import-events
 9. In the export, events are sorted by timestamps (closest events at the top)
 10. Only published/active events are included in export data
 
+## Video - How to use
+
+[![How to use](https://i.ytimg.com/vi/mvD-GTe72eo/maxresdefault.jpg)](https://www.youtube.com/watch?v=mvD-GTe72eo)
+
 ## Screenshots
 
 1. Admin page -  Manage Events

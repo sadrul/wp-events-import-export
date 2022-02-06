@@ -159,11 +159,14 @@ class EventsImportExport {
 	 * @since 1.0.0
 	 */
 	public function on_plugin_activate(){
-		// create events list page
+		// create events list page.
 		EventsImportExport\EventsShow::instance()->create_events_list_page();
 
-		// create events export page
+		// create events export page.
 		EventsImportExport\EventsExport::instance()->create_events_export_page();
+
+		// Create events cpt.
+		EventsImportExport\EventsImport::instance()->create_events_cpt();
 
 		// flush rewrite rules.
 		$this->flush_rewrite_rules();

@@ -156,8 +156,9 @@ class EventsImport {
 	 */
 	public function check_event_exists( $event_id ) {
 		$args = array(
-			'post_type'  => 'event',
-			'meta_query' => array(
+			'post_type'   => 'event',
+			'post_status' => array( 'draft', 'publish' ),
+			'meta_query'  => array(
 				array(
 					'key'     => 'event_id',
 					'value'   => $event_id,
