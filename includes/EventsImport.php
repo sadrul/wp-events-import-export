@@ -237,7 +237,7 @@ class EventsImport {
 		$message = sprintf( __( "Total %d events imported successfully! Newly created: %d events and updated: %d events", "events-import-export" ), $import_details['total'], $import_details['new'], $import_details['update'] );
 		$message .= sprintf( __( "\n\nTo see the upcoming events, please click here - %s", "events-import-export" ), $events_page );
 		$message .= sprintf( __( "\n\nTo export the upcoming events, please click here - %s", "events-import-export" ), $events_export_page );
-		wp_mail( 'logging@agentur-loop.com', $subject, $message );
+		wp_mail( 'testemail@testemail.com', $subject, $message );
 	}
 
 	/**
